@@ -4,6 +4,7 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_puzzle_platformer::player::PlayerPlugin; 
 use bevy_puzzle_platformer::collision::{CollisionPlugin, WallCollisionEvent, Static}; 
 use bevy_puzzle_platformer::enemy::EnemyPlugin;
+use bevy_puzzle_platformer::power_up::PowerUpPlugin;
 /*
 Puzzle platformer using Bevy.
 Core Mechanics:
@@ -27,6 +28,7 @@ fn main() {
     .add_plugins(PlayerPlugin)
     .add_plugins(EnemyPlugin)
     .add_plugins(CollisionPlugin)
+    .add_plugins(PowerUpPlugin)
     .add_systems(Startup, initial_spawn)
     .add_event::<WallCollisionEvent>()
     .run();

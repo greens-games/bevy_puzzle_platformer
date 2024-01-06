@@ -20,7 +20,7 @@ pub struct Player;
 
 #[derive(Component)]
 pub struct PlayerMovement {
-    jumps: i16,
+    pub jumps: i16,
     is_jumping: bool,
     velocity_x: f32,
     velocity_y: f32,
@@ -68,6 +68,7 @@ fn move_player(
                 Collision::Bottom => {
                     falling = false;
                     player_movement.velocity_y = 0.;
+                    player_movement.jumps = 1;
                 }, //We are on floor
                 Collision::Top => {},
                 Collision::Left => {
@@ -82,8 +83,6 @@ fn move_player(
 
     }
 
-
-
     if input.pressed(KeyCode::A) && move_left {
         transform.translation.x -= player_movement.velocity_x * time.delta_seconds();
     }
@@ -92,8 +91,9 @@ fn move_player(
         transform.translation.x += player_movement.velocity_x * time.delta_seconds();
     }
 
-    if input.just_pressed(KeyCode::Space) && !falling {
+    if input.just_pressed(KeyCode::Space) && player_movement.jumps != 0{
         player_movement.is_jumping = true;
+        player_movement.jumps = 0;
         player_movement.velocity_y = 400.; //set y velocity to big number
     }
 
