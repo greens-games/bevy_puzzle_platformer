@@ -2,6 +2,7 @@ use bevy::{prelude::*, sprite::collide_aabb::Collision};
 
 use crate::collision::{Collider, WallCollisionEvent};
 use crate::constants::GRAVITY;
+use crate::map::{TileMap, Tile, TileType};
 
 pub struct PlayerPlugin;
 
@@ -27,19 +28,36 @@ pub struct PlayerMovement {
     dashes: i16
 }
 
-fn spawn_player(mut commands:Commands) {
+fn spawn_player(
+    mut commands:Commands,
+    tile_map: Res<TileMap>
+) {
+    let mut player_start_x: f32 = 0.;
+    let mut player_start_y: f32 = 0.;
+    let scale_factor = 5.;
+    for tile in &tile_map.map {
+        match tile.tile_type {
+            TileType::PLAYER => {
+                //get x and y
+                player_start_x = f32::from(tile.x as i16) * (PLAYER_SIZE.x * 5.);
+                player_start_y = f32::from(tile.y as i16) * (PLAYER_SIZE.x * 5.);
+            },
+            _ => {}
+        }
+    }
     //spawn player
     commands.spawn((SpriteBundle {
         sprite : Sprite {
-            custom_size : Some(PLAYER_SIZE),
+            custom_size : Some(PLAYER_SIZE.mul_add(Vec2::new(scale_factor, scale_factor),Vec2::ZERO)),
             ..Default::default()
         },
+        transform: Transform::from_xyz(player_start_x, -player_start_y, 0.),
         ..Default::default()
     },
     Player,
     Collider {
-        width: 16.,
-        height: 16.
+        width: 16. * scale_factor,
+        height: 16. * scale_factor
     },
     PlayerMovement {
         jumps: 1,
@@ -77,7 +95,7 @@ fn move_player(
                 Collision::Right => {
                     move_right = false;
                 },
-                Collision::Inside => {println!("Nothing happened")},
+                Collision::Inside => {},
             }
         }
 

@@ -1,5 +1,7 @@
 use bevy::{prelude::*, sprite::collide_aabb::{Collision, collide}};
 
+use crate::map::{TileMap, TileType};
+
 
 pub struct CollisionPlugin;
 
@@ -27,45 +29,37 @@ pub struct WallCollisionEvent {
     pub collision_dir: Collision
 }
 
-fn spawn_map(mut commands:Commands) {
-    //spawn wall
-    commands.spawn((SpriteBundle {
-        sprite: Sprite {
-            custom_size : Some(Vec2::new(25.0, 100.0)),
-            ..Default::default()
-        },
-        transform: Transform {
-           translation: Vec3::new(60.0, 0.0, 0.0),
-           ..Default::default() 
-        },
-        ..Default::default()
-    }, 
-    Static,
-    Collider {
-        width: 25.,
-        height: 100.
-    }
-    ));
+fn spawn_map(
+    mut commands:Commands,
+    tile_map: Res<TileMap>
+) {
 
-
-    //spawn floor
-    commands.spawn((SpriteBundle {
-        sprite: Sprite {
-            custom_size : Some(Vec2::new(100., 16.)),
-            ..Default::default()
-        },
-        transform: Transform {
-           translation: Vec3::new(0., -50., 0.),
-           ..Default::default() 
-        },
-        ..Default::default()
-    }, 
-    Static,
-    Collider {
-        width: 100.,
-        height: 16.
+    let scale_factor = 5.;
+    for tile in &tile_map.map {
+        match tile.tile_type {
+            TileType::WALL=> {
+                let start_x = f32::from(tile.x as i16) * (16. * scale_factor);
+                let start_y = f32::from(tile.y as i16) * (16. * scale_factor);
+                commands.spawn((SpriteBundle {
+                    sprite: Sprite {
+                        custom_size : Some(Vec2::new(16. * scale_factor, 16. * scale_factor)),
+                        ..Default::default()
+                    },
+                    transform: Transform {
+                    translation: Vec3::new(start_x, -start_y, 0.0),
+                    ..Default::default() 
+                    },
+                    ..Default::default()
+                },
+                Static, 
+                Collider {
+                    width: 16. * scale_factor,
+                    height: 16. * scale_factor
+                }));
+            },
+            _ => {}
+        }
     }
-    ));
 }
 
 fn detect_collision(

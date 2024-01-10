@@ -1,10 +1,10 @@
-use bevy::ecs::system::Despawn;
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
-use bevy::transform::commands;
 
 use crate::collision::Collider;
-use crate::player;
+use crate::constants::scale_factor;
+use crate::map::TileMap;
+use crate::map::TileType;
 use crate::player::Player;
 use crate::player::PlayerMovement;
 
@@ -30,23 +30,36 @@ enum PowerUpType {
     JumpPowerUp
 }
 
-fn spawn_power_ups(mut commands:Commands) {
-    commands.spawn((SpriteBundle {
-        sprite: Sprite {
-            custom_size: Some(POWER_UP_SIZE.truncate()),
-            color: Color::RED,
-            ..Default::default()
-        },
-        transform: Transform {
-            translation: Vec3::new(-32., 0., 0.),
-            ..Default::default()
-        },
-        ..Default::default()
-    },
-    PowerUp {
-        power_up_type: PowerUpType::JumpPowerUp
+fn spawn_power_ups(
+    mut commands:Commands,
+    tile_map: Res<TileMap>
+) {
+    for tile in &tile_map.map {
+        match tile.tile_type {
+            TileType::POWER_UP => {
+                let start_x = f32::from(tile.x as i16) * (8. * scale_factor);
+                let start_y = f32::from(tile.x as i16) * (8. * scale_factor);
+                commands.spawn((SpriteBundle {
+                    sprite: Sprite {
+                        custom_size: Some(POWER_UP_SIZE.truncate().mul_add(Vec2::new(scale_factor, scale_factor), Vec2::ZERO)),
+                        color: Color::RED,
+                        ..Default::default()
+                    },
+                    transform: Transform {
+                        translation: Vec3::new(start_x, -start_y, 0.),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                PowerUp {
+                    power_up_type: PowerUpType::JumpPowerUp
+                }
+                ));
+            },
+            _ => {}
+            
+        }
     }
-    ));
 }
 
 /**
@@ -56,7 +69,7 @@ fn spawn_power_ups(mut commands:Commands) {
  * if collided applies powerup to player
  */
 fn power_up_system(
-    mut power_up_query: Query<(Entity, &PowerUp, &Transform), With<PowerUp>>,
+    power_up_query: Query<(Entity, &PowerUp, &Transform), With<PowerUp>>,
     mut player_query: Query<(&mut PlayerMovement, &Collider, &Transform), With<Player>>,
     mut commands: Commands
 ) {
@@ -64,7 +77,7 @@ fn power_up_system(
 
     for (entity, power_up, power_up_transform) in &power_up_query {
         let collision = collide(
-            power_up_transform.translation, POWER_UP_SIZE.truncate(),
+            power_up_transform.translation, POWER_UP_SIZE.truncate().mul_add(Vec2::new(scale_factor, scale_factor), Vec2::ZERO),
             player_transform.translation, Vec2::new(player_collider.width, player_collider.height)
         );
 
