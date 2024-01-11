@@ -28,7 +28,6 @@ fn main() {
     .add_plugins(WorldInspectorPlugin::new())
     .add_plugins(MapPlugin)
     .add_plugins(PlayerPlugin)
-    .add_plugins(EnemyPlugin)
     .add_plugins(CollisionPlugin)
     .add_plugins(PowerUpPlugin)
     .add_systems(Startup, initial_spawn)

@@ -1,7 +1,7 @@
 use bevy::{prelude::*, sprite::collide_aabb::Collision};
 
 use crate::collision::{Collider, WallCollisionEvent};
-use crate::constants::GRAVITY;
+use crate::constants::{GRAVITY, scale_factor};
 use crate::map::{TileMap, Tile, TileType};
 
 pub struct PlayerPlugin;
@@ -34,13 +34,14 @@ fn spawn_player(
 ) {
     let mut player_start_x: f32 = 0.;
     let mut player_start_y: f32 = 0.;
-    let scale_factor = 5.;
     for tile in &tile_map.map {
         match tile.tile_type {
             TileType::PLAYER => {
                 //get x and y
-                player_start_x = f32::from(tile.x as i16) * (PLAYER_SIZE.x * 5.);
-                player_start_y = f32::from(tile.y as i16) * (PLAYER_SIZE.x * 5.);
+                println!("Player x = {}, Player y = {}", tile.x, tile.y);
+                player_start_x = f32::from(tile.x as i16) * (PLAYER_SIZE.x * scale_factor) + 8.;
+                player_start_y = f32::from(tile.y as i16) * (PLAYER_SIZE.y * scale_factor) + 8.;
+                println!("Player x = {}, Player y = {}", player_start_x, player_start_y);
             },
             _ => {}
         }
@@ -48,7 +49,7 @@ fn spawn_player(
     //spawn player
     commands.spawn((SpriteBundle {
         sprite : Sprite {
-            custom_size : Some(PLAYER_SIZE.mul_add(Vec2::new(scale_factor, scale_factor),Vec2::ZERO)),
+            custom_size : Some(PLAYER_SIZE),
             ..Default::default()
         },
         transform: Transform::from_xyz(player_start_x, -player_start_y, 0.),
@@ -91,11 +92,13 @@ fn move_player(
                 Collision::Top => {},
                 Collision::Left => {
                     move_left = false;
+                    println!("Hit left");
                 },
                 Collision::Right => {
                     move_right = false;
+                    println!("Hit Right");
                 },
-                Collision::Inside => {},
+                Collision::Inside => {println!("Do Nothing stuck inside")},
             }
         }
 

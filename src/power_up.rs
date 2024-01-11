@@ -37,8 +37,9 @@ fn spawn_power_ups(
     for tile in &tile_map.map {
         match tile.tile_type {
             TileType::POWER_UP => {
-                let start_x = f32::from(tile.x as i16) * (8. * scale_factor);
-                let start_y = f32::from(tile.x as i16) * (8. * scale_factor);
+                let start_x = f32::from(tile.x as i16) * (8. * scale_factor) + 4.;
+                let start_y = f32::from(tile.y as i16) * (8. * scale_factor) + 4.;
+
                 commands.spawn((SpriteBundle {
                     sprite: Sprite {
                         custom_size: Some(POWER_UP_SIZE.truncate().mul_add(Vec2::new(scale_factor, scale_factor), Vec2::ZERO)),
